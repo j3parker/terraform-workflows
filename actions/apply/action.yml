@@ -1,0 +1,24 @@
+name: 'Terraform Apply'
+
+inputs:
+
+  config:
+    description: Environment config object from terraform-workflows/collect
+    required: true
+
+runs:
+  using: composite
+  steps:
+
+    - id: download
+      run: ${{ github.action_path }}/download.sh
+      shell: bash
+      env:
+        PLAN_RUN_ID: ${{ fromJson(inputs.config).run_id }}
+
+    - working-directory: ${{ fromJson(inputs.config).workspace_path }}
+      run: ${{ github.action_path }}/apply.sh
+      shell: bash
+      env:
+        PLAN_PATH: ${{ steps.download.outputs.artifacts_dir }}/terraform.plan
+        ENVIRONMENT: ${{ fromJson(inputs.config).environment }}

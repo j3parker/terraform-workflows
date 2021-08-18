@@ -1,0 +1,44 @@
+name: 'Terraform Plan'
+
+inputs:
+
+  GITHUB_TOKEN:
+    default: ${{ github.token }}
+
+  config:
+    description: Environment config object from terraform-workflows/configure
+    required: true
+
+runs:
+  using: composite
+  steps:
+
+    - id: setup
+      shell: bash
+      run: |
+        echo "::set-output name=artifacts_dir::$(mktemp -d)"
+
+    - id: plan
+      working-directory: ${{ fromJson(inputs.config).workspace_path }}
+      run: ${{ github.action_path }}/plan.sh
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
+        COMMENTS_URL: ${{ github.event.pull_request._links.comments.href }}
+        ARTIFACTS_DIR: ${{ steps.setup.outputs.artifacts_dir }}
+        ENVIRONMENT: ${{ fromJson(inputs.config).environment }}
+        PROVIDER_ROLE_ARN: ${{ fromJson(inputs.config).provider_role_arn }}
+        PROVIDER_ROLE_TFVAR: ${{ fromJson(inputs.config).provider_role_tfvar }}
+
+    - run: ${{ github.action_path }}/details.sh
+      shell: bash
+      env:
+        ARTIFACTS_DIR: ${{ steps.setup.outputs.artifacts_dir }}
+        ENVIRONMENT: ${{ fromJson(inputs.config).environment }}
+        HAS_CHANGES: ${{ steps.plan.outputs.has_changes }}
+        WORKSPACE_PATH: ${{ fromJson(inputs.config).workspace_path }}
+
+    - run: ${{ github.action_path }}/archive.sh
+      shell: bash
+      env:
+        PATH_TO_ARCHIVE: ${{ steps.setup.outputs.artifacts_dir }}

@@ -1,0 +1,17 @@
+name: 'Terraform Configure'
+
+outputs:
+  environments:
+    value: ${{ steps.finish.outputs.environments }}
+  config:
+    value: ${{ steps.finish.outputs.config }}
+
+runs:
+  using: composite
+  steps:
+
+    - id: finish
+      shell: bash
+      run: |
+        echo "::set-output name=environments::${D2L_TF_ENVS}"
+        echo "::set-output name=config::${D2L_TF_CONFIG}"
