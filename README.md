@@ -138,14 +138,14 @@ jobs:
     timeout-minutes: 1
 
     steps:
-      - uses: Brightspace/terraform-workflows@configure/v1
+      - uses: Brightspace/terraform-workflows@configure/v2
         with:
           environment: dev/ca-central-1
           workspace_path: terraform/environments/dev/ca-central-1
           provider_role_arn_ro: "{ terraform plan role in your dev account }"
           provider_role_arn_rw: "{ terraform apply role in your dev account }"
 
-      - uses: Brightspace/terraform-workflows@configure/v1
+      - uses: Brightspace/terraform-workflows@configure/v2
         with:
           environment: prod/ca-central-1
           workspace_path: terraform/environments/prod/ca-central-1
@@ -153,7 +153,7 @@ jobs:
           provider_role_arn_rw: "{ terraform apply role in your prod account }"
 
       - id: finish
-        uses: Brightspace/terraform-workflows/finish@configure/v1
+        uses: Brightspace/terraform-workflows/finish@configure/v2
 
     outputs:
       environments: ${{ steps.finish.outputs.environments }}
@@ -176,7 +176,7 @@ jobs:
     steps:
     - uses: Brightspace/third-party-actions@actions/checkout
 
-    - uses: Brightspace/terraform-workflows@plan/v1
+    - uses: Brightspace/terraform-workflows@plan/v2
       with:
         config: ${{ toJson(fromJson(needs.configure.outputs.config)[matrix.environment]) }}
         terraform_version: 1.0.3
@@ -193,7 +193,7 @@ jobs:
 
     steps:
     - id: collect
-      uses: Brightspace/terraform-workflows@collect/v1
+      uses: Brightspace/terraform-workflows@collect/v2
 
     outputs:
       has_changes: ${{ steps.collect.outputs.has_changes }}
@@ -220,7 +220,7 @@ jobs:
     steps:
     - uses: Brightspace/third-party-actions@actions/checkout
 
-    - uses: Brightspace/terraform-workflows@apply/v1
+    - uses: Brightspace/terraform-workflows@apply/v2
       with:
         config: ${{ toJson(fromJson(needs.collect.outputs.config)[matrix.environment]) }}
 
