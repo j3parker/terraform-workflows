@@ -29,7 +29,8 @@ AWS_SESSION_TOKEN=$(jq -r '.Credentials.SessionToken' <<< "${ASSUMEROLE_RESULT}"
 
 S3_PATH="s3://d2l-terraform-plans/github/${GITHUB_REPOSITORY}/${GITHUB_SHA}/${GITHUB_WORKFLOW}/${GITHUB_RUN_NUMBER}/${GITHUB_RUN_ID}.tar.gz"
 
+echo "##[group]upload plan"
 aws s3 cp \
 	"${TAR_FILE}" \
-	"${S3_PATH}" \
-	> /dev/null
+	"${S3_PATH}"
+echo "##[endgroup]"
