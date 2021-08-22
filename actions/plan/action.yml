@@ -50,4 +50,5 @@ runs:
     - run: ${{ github.action_path }}/archive.sh
       shell: bash
       env:
+        ENVIRONMENT: ${{ fromJson(inputs.config).environment }}
         PATH_TO_ARCHIVE: ${{ steps.setup.outputs.artifacts_dir }}

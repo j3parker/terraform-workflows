@@ -35,9 +35,8 @@ for f in "${DOWNLOAD_DIR}"/*.tar.gz; do
 
 	tar -xzf "${f}" -C "${EXTRACTION_DIR}"
 
-	RUN_ID=$(jq -r '.run_id' "${EXTRACTION_DIR}/details.json")
-
-	mv "${EXTRACTION_DIR}/details.json" "${DETAILS_DIR}/${RUN_ID}.json"
+	ENVIRONMENT_SAFE=$(jq -r '.environment' "${EXTRACTION_DIR}/details.json" | xxd -p)
+	mv "${EXTRACTION_DIR}/details.json" "${DETAILS_DIR}/${ENVIRONMENT_SAFE}.json"
 
 	rm -r "${EXTRACTION_DIR}"
 done
