@@ -19,7 +19,7 @@ runs:
       run: ${{ github.action_path }}/download.sh
       shell: bash
       env:
-        PLAN_RUN_ID: ${{ fromJson(inputs.config).run_id }}
+        ENVIRONMENT: ${{ fromJson(inputs.config).environment }}
 
     - working-directory: ${{ fromJson(inputs.config).workspace_path }}
       run: ${{ github.action_path }}/apply.sh
