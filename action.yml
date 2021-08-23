@@ -9,6 +9,10 @@ inputs:
     description: Environment config object from terraform-workflows/configure
     required: true
 
+  refresh_on_pr:
+    description: true/false. Whether to do a refresh for PR plans.
+    default: true
+
   terraform_version:
     description: Which version of terraform to use
     required: true
@@ -38,6 +42,7 @@ runs:
         ENVIRONMENT: ${{ fromJson(inputs.config).environment }}
         PROVIDER_ROLE_ARN: ${{ fromJson(inputs.config).provider_role_arn }}
         PROVIDER_ROLE_TFVAR: ${{ fromJson(inputs.config).provider_role_tfvar }}
+        REFRESH_ON_PR: ${{ inputs.refresh_on_pr }}
 
     - run: ${{ github.action_path }}/details.sh
       shell: bash
