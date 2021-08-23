@@ -9,8 +9,13 @@ onexit() {
 	rm "${BACKEND_CONFIG}"
 }
 
+REFRESH=""
 if [ "${GITHUB_EVENT_NAME}" == "pull_request" ]; then
 	ROLE_KIND="reader"
+
+	if [ "${REFRESH_ON_PR}" == "false" ]; then
+		REFRESH="-refresh=false"
+	fi
 else
 	ROLE_KIND="manager"
 fi
@@ -34,7 +39,8 @@ terraform plan \
 	-lock=false \
 	-detailed-exitcode \
 	-var "${PROVIDER_ROLE_TFVAR}=${PROVIDER_ROLE_ARN}" \
-	-out "${ARTIFACTS_DIR}/terraform.plan"
+	-out "${ARTIFACTS_DIR}/terraform.plan" \
+	${REFRESH}
 
 PLAN_EXIT_CODE=$?
 case "${PLAN_EXIT_CODE}" in
