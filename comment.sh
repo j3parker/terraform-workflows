@@ -26,6 +26,8 @@ ${PLAN_TEXT}
 EOF
 )
 
+set -x
+
 GITHUB_COMMENT_BODY=$(jq -rR '. | { body: . }' <<< "${GITHUB_COMMENT_TEXT}")
 curl \
 	--silent \
