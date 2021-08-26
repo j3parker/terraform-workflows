@@ -2,13 +2,6 @@
 
 set -euo pipefail
 
-trap onexit EXIT
-onexit() {
-	set +u
-
-	rm "${POST_DATA_FILE}" 2> /dev/null || true
-}
-
 if [ "${GITHUB_TOKEN}" == "" ]; then
 	exit 0
 fi
@@ -33,13 +26,12 @@ ${PLAN_TEXT}
 EOF
 )
 
-POST_DATA_FILE=$(mktemp)
-jq -rR '. | { body: . }' <<< "${GITHUB_COMMENT_TEXT}" > "${POST_DATA_FILE}"
+GITHUB_COMMENT_BODY=$(jq -rR '. | { body: . }' <<< "${GITHUB_COMMENT_TEXT}")
 curl \
 	--silent \
 	--fail \
 	--request POST \
 	--url "${COMMENTS_URL}" \
 	--header "Authorization: Bearer ${GITHUB_TOKEN}" \
-	--data "@${POST_DATA_FILE}" \
-	> /dev/null
+	--data "@-" \
+	<<< "${GITHUB_COMMENT_BODY}"
