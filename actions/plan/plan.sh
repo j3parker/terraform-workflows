@@ -54,7 +54,6 @@ case "${PLAN_EXIT_CODE}" in
 	"2")
 		# success with changes
 		echo "::set-output name=has_changes::true"
-		CHANGES_DESCRIPTION="has changes :yellow_circle:"
 		;;
 
 	*)
@@ -66,37 +65,3 @@ esac
 set -e
 
 terraform show -json "${ARTIFACTS_DIR}/terraform.plan" > "${ARTIFACTS_DIR}/terraform.plan.json"
-
-PLAN_TEXT=$(terraform show "${ARTIFACTS_DIR}/terraform.plan" -no-color)
-ENCODED_PLAN=$(echo "${PLAN_TEXT}" | sed -z 's/%/%25/g; s/\n/%0A/g; s/\r/%0D/g')
-echo "::set-output name=plan::${ENCODED_PLAN}"
-
-if [ "${GITHUB_TOKEN}" != "" ] && [ "${COMMENTS_URL}" != "" ]; then
-	GITHUB_COMMENT_TEXT=$(cat << EOF
-<details>
-<summary>
-<b>${ENVIRONMENT} terraform plan</b>
-${CHANGES_DESCRIPTION}
-</summary>
-
-\`\`\`
-${PLAN_TEXT}
-\`\`\`
-</details>
-EOF
-)
-
-	GITHUB_COMMENT_BODY=$(jq \
-		--null-input \
-		--arg body "${GITHUB_COMMENT_TEXT}" \
-		'{body:$body}' \
-	)
-	curl \
-		--silent \
-		--fail \
-		--request POST \
-		--url "${COMMENTS_URL}" \
-		--header "Authorization: Bearer ${GITHUB_TOKEN}" \
-		--data "${GITHUB_COMMENT_BODY}" \
-		> /dev/null
-fi
