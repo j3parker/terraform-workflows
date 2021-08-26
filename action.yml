@@ -63,3 +63,4 @@ runs:
         GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
         COMMENTS_URL: ${{ github.event.pull_request._links.comments.href }}
         ARTIFACTS_DIR: ${{ steps.setup.outputs.artifacts_dir }}
+        ENVIRONMENT: ${{ fromJson(inputs.config).environment }}
