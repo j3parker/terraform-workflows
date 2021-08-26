@@ -56,7 +56,8 @@ runs:
         ENVIRONMENT: ${{ fromJson(inputs.config).environment }}
         PATH_TO_ARCHIVE: ${{ steps.setup.outputs.artifacts_dir }}
 
-    - run: ${{ github.action_path }}/comment.sh
+    - working-directory: ${{ fromJson(inputs.config).workspace_path }}
+      run: ${{ github.action_path }}/comment.sh
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
