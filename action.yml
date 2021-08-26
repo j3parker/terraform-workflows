@@ -36,8 +36,6 @@ runs:
       run: ${{ github.action_path }}/plan.sh
       shell: bash
       env:
-        GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
-        COMMENTS_URL: ${{ github.event.pull_request._links.comments.href }}
         ARTIFACTS_DIR: ${{ steps.setup.outputs.artifacts_dir }}
         ENVIRONMENT: ${{ fromJson(inputs.config).environment }}
         PROVIDER_ROLE_ARN: ${{ fromJson(inputs.config).provider_role_arn }}
@@ -57,3 +55,10 @@ runs:
       env:
         ENVIRONMENT: ${{ fromJson(inputs.config).environment }}
         PATH_TO_ARCHIVE: ${{ steps.setup.outputs.artifacts_dir }}
+
+    - run: ${{ github.action_path }}/comment.sh
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
+        COMMENTS_URL: ${{ github.event.pull_request._links.comments.href }}
+        ARTIFACTS_DIR: ${{ steps.setup.outputs.artifacts_dir }}
