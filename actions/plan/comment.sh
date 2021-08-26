@@ -46,4 +46,5 @@ curl \
 	--url "${COMMENTS_URL}" \
 	--header "Authorization: Bearer ${GITHUB_TOKEN}" \
 	--data "@-" \
-	<<< "${GITHUB_COMMENT_BODY}"
+	<<< "${GITHUB_COMMENT_BODY}" \
+	> /dev/null
