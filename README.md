@@ -290,6 +290,7 @@ jobs:
     needs: configure
 
     strategy:
+      fail-fast: false
       matrix:
         environment: ${{ fromJson(needs.configure.outputs.environments) }}
 
@@ -313,6 +314,7 @@ jobs:
     needs: configure
 
     strategy:
+      fail-fast: false
       matrix:
         environment: ${{ fromJson(needs.configure.outputs.environments) }}
 
@@ -354,6 +356,7 @@ jobs:
     if: ${{ needs.collect.outputs.has_changes == 'true' }}
 
     strategy:
+      fail-fast: false
       matrix:
         environment: ${{ fromJson(needs.collect.outputs.changed) }}
 
