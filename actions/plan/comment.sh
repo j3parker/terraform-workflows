@@ -17,6 +17,10 @@ if [ "${COMMENTS_URL}" == "" ]; then
 	exit 0
 fi
 
+if [ "${HAS_CHANGES}" == "false" ]; then
+	exit 0
+fi
+
 PLAN_TEXT=$(terraform show "${ARTIFACTS_DIR}/terraform.plan" -no-color)
 
 GITHUB_COMMENT_TEXT=$(mktemp)
