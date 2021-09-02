@@ -46,8 +46,8 @@ Note that as a side-effect of a limitation there will be an environment called `
 
 ### iam-build-tokens
 
-The [iam-build-tokens](https://github.com/Brightspace/iam-build-tokens) repository contains the 
-registry of the roles that require access to company resources.  These tokens enable the ability 
+The [iam-build-tokens](https://github.com/Brightspace/iam-build-tokens) repository contains the
+registry of the roles that require access to company resources.  These tokens enable the ability
 to read/write/update systems like the build state, etc.
 
 You must add roles for your workflows to use to this repository.
@@ -87,7 +87,7 @@ module "your_repo_name_ro" {
 }
 ```
 
-The roles defined here should be read-write access roles. (Please note the difference 
+The roles defined here should be read-write access roles. (Please note the difference
 in module name.)
 Be sure that the listed environments matches the environments you created earlier.
 You will know it is working when you check your Environments and see a green lock
@@ -248,6 +248,7 @@ env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
+  TERRAFORM_VERSION: 1.0.5
 
 jobs:
 
@@ -279,12 +280,12 @@ jobs:
       config: ${{ steps.finish.outputs.config }}
 
 
-  plan:
-    name: Plan
+  plan_pr:
+    name: Plan [PR]
     runs-on: [self-hosted, Linux, AWS]
     timeout-minutes: 10
 
-    environment: ${{ (github.event_name != 'pull_request' && 'preflight') || 'pr' }}
+    if: ${{ github.event_name == 'pull_request' }}
 
     needs: configure
 
@@ -298,7 +299,30 @@ jobs:
     - uses: Brightspace/terraform-workflows@plan/v2
       with:
         config: ${{ toJson(fromJson(needs.configure.outputs.config)[matrix.environment]) }}
-        terraform_version: 1.0.4
+        terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+
+  plan:
+    name: Plan
+    runs-on: [self-hosted, Linux, AWS]
+    timeout-minutes: 10
+
+    if: ${{ github.event_name != 'pull_request' }}
+    environment: preflight
+
+    needs: configure
+
+    strategy:
+      matrix:
+        environment: ${{ fromJson(needs.configure.outputs.environments) }}
+
+    steps:
+    - uses: Brightspace/third-party-actions@actions/checkout
+
+    - uses: Brightspace/terraform-workflows@plan/v2
+      with:
+        config: ${{ toJson(fromJson(needs.configure.outputs.config)[matrix.environment]) }}
+        terraform_version: ${{ env.TERRAFORM_VERSION }}
 
 
   collect:
