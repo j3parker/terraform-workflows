@@ -64,4 +64,4 @@ runs:
         COMMENTS_URL: ${{ github.event.pull_request._links.comments.href }}
         ARTIFACTS_DIR: ${{ steps.setup.outputs.artifacts_dir }}
         ENVIRONMENT: ${{ fromJson(inputs.config).environment }}
-        HAS_CHAGES: ${{ steps.plan.outsputs.has_changes }}
+        HAS_CHANGES: ${{ steps.plan.outsputs.has_changes }}
