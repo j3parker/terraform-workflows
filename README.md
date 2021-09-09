@@ -198,8 +198,8 @@ and click `Edit trust relationship`.
 
 Be sure to make this change in both your Dev and Prod accounts.
 
-Apply the following change:
-```
+1. Apply the following policy to your terraform plan role. Be sure to replace `{ your repo name }`:
+```json
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -207,8 +207,28 @@ Apply the following change:
       "Effect": "Allow",
       "Principal": {
         "AWS": [
-          "arn:aws:iam::323258989788:role/hub-roles/github+Brightspace+{ your repo name }+deploy",
           "arn:aws:iam::323258989788:role/hub-roles/github+Brightspace+{ your repo name }"
+        ]
+      },
+      "Action": [
+        "sts:AssumeRole",
+        "sts:TagSession"
+      ]
+    }
+  ]
+}
+```
+
+2. And this policy to your terraform apply role. Be sure to replace `{ your repo name }`:
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": [
+          "arn:aws:iam::323258989788:role/hub-roles/github+Brightspace+{ your repo name }+deploy"
         ]
       },
       "Action": [
