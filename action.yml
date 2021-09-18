@@ -1,0 +1,48 @@
+name: 'Terraform Script'
+
+inputs:
+
+  environment:
+    description: Name of the deployment / environment
+    required: true
+
+  workspace_path:
+    description: Path to the terraform workspace
+    required: true
+
+  provider_role_arn:
+    description: Role ARN to provide as a tfvar
+    required: true
+
+  provider_role_tfvar:
+    descritpion: tfvar name to use when specifying the provider role ARN
+    default: 'terraform_role_arn'
+
+  terraform_version:
+    description: Which version of terraform to use
+    required: true
+
+  run:
+    description: Bash script to run
+    required: true
+
+runs:
+  using: composite
+  steps:
+
+    - uses: Brightspace/third-party-actions@hashicorp/setup-terraform
+      with:
+        terraform_version: ${{ inputs.terraform_version }}
+        terraform_wrapper: false
+
+    - working-directory: ${{ inputs.workspace_path }}
+      run: ${{ github.action_path }}/init.sh
+      shell: bash
+      env:
+        ENVIRONMENT: ${{ inputs.environment }}
+        PROVIDER_ROLE_ARN: ${{ inputs.provider_role_arn }}
+        PROVIDER_ROLE_TFVAR: ${{ inputs.provider_role_tfvar }}
+
+    - working-directory: ${{ inputs.workspace_path }}
+      run: ${{ inputs.run }}
+      shell: bash
