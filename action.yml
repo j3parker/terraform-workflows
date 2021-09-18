@@ -46,3 +46,5 @@ runs:
     - working-directory: ${{ inputs.workspace_path }}
       run: ${{ inputs.run }}
       shell: bash
+      env:
+        TF_INPUT: 0
