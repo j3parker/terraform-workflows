@@ -44,7 +44,7 @@ runs:
         PROVIDER_ROLE_TFVAR: ${{ inputs.provider_role_tfvar }}
 
     - working-directory: ${{ inputs.workspace_path }}
-      run: bash -c "${{ inputs.run }}"
+      run: ${{ inputs.run }}
       shell: bash
       env:
         TF_INPUT: 0
