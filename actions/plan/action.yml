@@ -17,6 +17,11 @@ inputs:
     description: Which version of terraform to use
     required: true
 
+outputs:
+  plan_json:
+    description: Planned changes as JSON
+    value: ${{ steps.plan.outputs.plan_json }}
+
 runs:
   using: composite
   steps:
