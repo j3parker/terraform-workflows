@@ -61,9 +61,11 @@ curl \
 
 # Hide previous comment if any. Allowed to fail
 ALLOW_FAILURE="true"
+set -x
 
 SEARCH_TERM="${ENVIRONMENT} terraform plan"
 PREVIOUS_COMMENT_ID=$(curl \
+	--silent \
 	--fail \
 	--request GET \
 	--url "${COMMENTS_URL}?per_page=100" \
@@ -71,7 +73,7 @@ PREVIOUS_COMMENT_ID=$(curl \
 	| jq -r '[.[] | select(.body | contains("'"${SEARCH_TERM}"'"))] | first.node_id'
 )
 
-if [[ ! -z "${PREVIOUS_COMMENT_ID}" ]]; then
+if [ "${PREVIOUS_COMMENT_ID}" != "" ]; then
 	read -r -d '' GRAPHQL_QUERY << EOF
 mutation {
   minimizeComment(input: {classifier: OUTDATED, subjectId: "${PREVIOUS_COMMENT_ID}"}) {
