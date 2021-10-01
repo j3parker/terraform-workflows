@@ -74,7 +74,7 @@ PREVIOUS_COMMENT_ID=$(curl \
 )
 
 if [ "${PREVIOUS_COMMENT_ID}" != "" ]; then
-	read -r -d '' GRAPHQL_QUERY << EOF
+	GRAPHQL_QUERY=$(cat << EOF
 mutation {
   minimizeComment(input: {classifier: OUTDATED, subjectId: "${PREVIOUS_COMMENT_ID}"}) {
     minimizedComment {
@@ -83,6 +83,7 @@ mutation {
   }
 }
 EOF
+)
 
 	GRAPHQL_CALL_BODY=$(jq \
 		--null-input \
