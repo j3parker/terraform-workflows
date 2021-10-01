@@ -62,6 +62,14 @@ runs:
         PATH_TO_ARCHIVE: ${{ steps.setup.outputs.artifacts_dir }}
 
     - working-directory: ${{ fromJson(inputs.config).workspace_path }}
+      run: ${{ github.action_path }}/hide-old-comment.sh
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
+        COMMENTS_URL: ${{ github.event.pull_request._links.comments.href }}
+        ENVIRONMENT: ${{ fromJson(inputs.config).environment }}
+
+    - working-directory: ${{ fromJson(inputs.config).workspace_path }}
       run: ${{ github.action_path }}/comment.sh
       shell: bash
       env:

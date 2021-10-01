@@ -7,10 +7,6 @@ onexit() {
 	set +u
 
 	rm "${GITHUB_COMMENT_TEXT}" 2> /dev/null || true
-
-	if [ "${ALLOW_FAILURE}" == "true" ]; then
-		exit 0
-	fi
 }
 
 if [ "${GITHUB_TOKEN}" == "" ]; then
@@ -57,47 +53,3 @@ curl \
 	--data "@-" \
 	<<< "${GITHUB_COMMENT_BODY}" \
 	> /dev/null
-
-
-# Hide previous comment if any. Allowed to fail
-ALLOW_FAILURE="true"
-set -x
-
-SEARCH_TERM="${ENVIRONMENT} terraform plan"
-PREVIOUS_COMMENT_ID=$(curl \
-	--silent \
-	--fail \
-	--request GET \
-	--url "${COMMENTS_URL}?per_page=100" \
-	--header "Authorization: Bearer ${GITHUB_TOKEN}" \
-	| jq -r '[.[] | select(.body | contains("'"${SEARCH_TERM}"'"))] | first.node_id'
-)
-
-if [ "${PREVIOUS_COMMENT_ID}" != "" ]; then
-	GRAPHQL_QUERY=$(cat << EOF
-mutation {
-  minimizeComment(input: {classifier: OUTDATED, subjectId: "${PREVIOUS_COMMENT_ID}"}) {
-    minimizedComment {
-      isMinimized
-    }
-  }
-}
-EOF
-)
-
-	GRAPHQL_CALL_BODY=$(jq \
-		--null-input \
-		-rR \
-		--arg query "${GRAPHQL_QUERY}" \
-		'{ query: $query }'
-	)
-
-	curl \
-		--fail \
-		--request POST \
-		--url "https://api.github.com/graphql" \
-		--header "Authorization: Bearer ${GITHUB_TOKEN}" \
-		--data "@-" \
-		<<< "${GRAPHQL_CALL_BODY}" \
-		> /dev/null
-fi
