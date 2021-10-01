@@ -46,6 +46,7 @@ EOF
 	)
 
 	curl \
+		--silent \
 		--fail \
 		--request POST \
 		--url "https://api.github.com/graphql" \
