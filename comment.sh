@@ -64,7 +64,6 @@ ALLOW_FAILURE="true"
 
 SEARCH_TERM="${ENVIRONMENT} terraform plan"
 PREVIOUS_COMMENT_ID=$(curl \
-	--silent \
 	--fail \
 	--request GET \
 	--url "${COMMENTS_URL}?per_page=100" \
@@ -91,7 +90,6 @@ EOF
 	)
 
 	curl \
-		--silent \
 		--fail \
 		--request POST \
 		--url "https://api.github.com/graphql" \
