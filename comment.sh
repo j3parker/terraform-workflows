@@ -71,6 +71,14 @@ PREVIOUS_COMMENT_ID=$(curl \
 	| jq -r '[.[] | select(.body | contains("'"${SEARCH_TERM}"'"))] | first.node_id'
 )
 
+echo "Previous comment: ${PREVIOUS_COMMENT_ID}"
+
+curl \
+	--fail \
+	--request GET \
+	--url "${COMMENTS_URL}?per_page=100" \
+	--header "Authorization: Bearer ${GITHUB_TOKEN}"
+
 if [ ! -z "${PREVIOUS_COMMENT_ID}" ]; then
 	read -r -d '' GRAPHQL_QUERY << EOF
 mutation {
