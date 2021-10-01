@@ -23,7 +23,7 @@ PREVIOUS_COMMENT_ID=$(curl \
 	--request GET \
 	--url "${COMMENTS_URL}?per_page=100" \
 	--header "Authorization: Bearer ${GITHUB_TOKEN}" \
-	| jq -r '[.[] | select(.body | contains("'"${SEARCH_TERM}"'"))] | first.node_id'
+	| jq -r '[.[] | select(.body | contains("'"${SEARCH_TERM}"'"))] | last.node_id'
 )
 
 if [ "${PREVIOUS_COMMENT_ID}" != "" ]; then
