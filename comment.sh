@@ -27,7 +27,7 @@ GITHUB_COMMENT_TEXT=$(mktemp)
 cat << EOF > "${GITHUB_COMMENT_TEXT}"
 <details>
 <summary>
-<b>${ENVIRONMENT} terraform plan</b>
+<b>${ENVIRONMENT} terraform plan</b> (${GITHUB_SHA})
 has changes :yellow_circle:
 </summary>
 
