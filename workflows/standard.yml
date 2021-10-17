@@ -1,0 +1,158 @@
+name: Terraform
+
+on:
+  workflow_call:
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        required: true
+      AWS_ACCESS_ACCESS_KEY:
+        required: true
+      AWS_SESSION_TOKEN:
+        required: true
+
+    inputs:
+      terraform-version:
+        type: string
+        required: true
+      directory:
+        type: string
+        required: true
+        default: terraform/environments
+      refresh-in-pr:
+        type: boolean
+        required: true
+        default: false
+      apply-timeout-minutes:
+        type: number
+        required: true
+        default: 10
+      plan-timeout-minutes:
+        type: number
+        required: true
+        deafult: 10
+
+jobs:
+
+  configure:
+    name: Configure
+    runs-on: [self-hosted, Linux, AWS]
+    timeout-minutes: 2
+
+    steps:
+      - uses: Brightspace/third-party-actions@actions/checkout
+
+      - id: auto-configure
+        uses: Brightspace/terraform-workflows/actions/auto-configure@main
+        with:
+          directory: ${{ inputs.directory }}
+
+    outputs:
+      environments: ${{ steps.auto-configure.outputs.environments }}
+      config: ${{ steps.auto-configure.outputs.config }}
+
+
+  plan_pr:
+    name: Plan [PR]
+    runs-on: [self-hosted, Linux, AWS]
+    timeout-minutes: ${{ inputs.plan-timeout-minutes }}
+
+    if: ${{ github.event_name == 'pull_request' }}
+
+    needs: configure
+
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: ${{ fromJson(needs.configure.outputs.environments) }}
+
+    steps:
+      - uses: Brightspace/third-party-actions@actions/checkout
+
+      - uses: Brightspace/terraform-workflows/actions/plan@main
+        with:
+          refresh: ${{ inputs.refresh-for-pr }}
+          config: ${{ toJson(fromJson(needs.configure.outputs.config)[matrix.environment]) }}
+          terraform_version: ${{ inputs.terraform-version }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
+
+
+  plan:
+    name: Plan
+    runs-on: [self-hosted, Linux, AWS]
+    timeout-minutes: ${{ inputs.plan-timeout-minutes }}
+
+    if: ${{ github.event_name != 'pull_request' }}
+    environment: preflight
+
+    needs: configure
+
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: ${{ fromJson(needs.configure.outputs.environments) }}
+
+    steps:
+      - uses: Brightspace/third-party-actions@actions/checkout
+
+      - uses: Brightspace/terraform-workflows/actions/plan@main
+        with:
+          config: ${{ toJson(fromJson(needs.configure.outputs.config)[matrix.environment]) }}
+          terraform_version: ${{ inputs.terraform-version }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
+
+  collect:
+    name: Collect
+    runs-on: [self-hosted, Linux, AWS]
+    timeout-minutes: 2
+
+    needs: plan
+
+    if: ${{ github.event_name != 'pull_request' }}
+
+    steps:
+      - id: collect
+        uses: Brightspace/terraform-workflows/actions/collect@main
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
+
+    outputs:
+      has_changes: ${{ steps.collect.outputs.has_changes }}
+      changed: ${{ steps.collect.outputs.changed }}
+      config: ${{ steps.collect.outputs.config }}
+
+
+  apply:
+    name: Apply
+    runs-on: [self-hosted, Linux, AWS]
+    timeout-minutes: ${{ inputs.apply-timeout-minutes }}
+
+    needs: collect
+
+    if: ${{ needs.collect.outputs.has_changes == 'true' }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: ${{ fromJson(needs.collect.outputs.changed) }}
+
+    environment: ${{ matrix.environment }}
+    concurrency: ${{ matrix.environment }}
+
+    steps:
+      - uses: Brightspace/third-party-actions@actions/checkout
+
+      - uses: Brightspace/terraform-workflows/actions/apply@main
+        with:
+          config: ${{ toJson(fromJson(needs.collect.outputs.config)[matrix.environment]) }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
