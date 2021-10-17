@@ -18,7 +18,7 @@ on:
         type: string
         required: true
         default: terraform/environments
-      refresh-in-pr:
+      refresh-on-pr:
         type: boolean
         required: true
         default: false
@@ -70,7 +70,7 @@ jobs:
 
       - uses: Brightspace/terraform-workflows/actions/plan@main
         with:
-          refresh: ${{ inputs.refresh-for-pr }}
+          refresh_on_pr: ${{ inputs.refresh-on-pr }}
           config: ${{ toJson(fromJson(needs.configure.outputs.config)[matrix.environment]) }}
           terraform_version: ${{ inputs.terraform-version }}
         env:
