@@ -42,9 +42,9 @@ terraform plan \
 	-var "${PROVIDER_ROLE_TFVAR}=${PROVIDER_ROLE_ARN}" \
 	-out "${ARTIFACTS_DIR}/terraform.plan" \
 	${REFRESH}
+PLAN_EXIT_CODE=$?
 echo "##[endgroup]"
 
-PLAN_EXIT_CODE=$?
 case "${PLAN_EXIT_CODE}" in
 
 	"0")
