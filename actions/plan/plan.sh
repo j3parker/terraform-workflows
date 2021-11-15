@@ -78,4 +78,5 @@ if [[ -d .artifacts ]]; then
 fi
 
 PLAN_JSON=$(terraform show -json "${ARTIFACTS_DIR}/terraform.plan" | tee "${ARTIFACTS_DIR}/terraform.plan.json")
+echo "::set-output name=plan_json_path::${ARTIFACTS_DIR}/terraform.plan.json"
 echo "::set-output name=plan_json::${PLAN_JSON}"
