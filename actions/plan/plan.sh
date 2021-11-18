@@ -34,6 +34,7 @@ terraform init -input=false -backend-config="${BACKEND_CONFIG}"
 echo "##[endgroup]"
 
 set +e
+echo "##[group]terraform plan"
 terraform plan \
 	-input=false \
 	-lock=false \
@@ -41,8 +42,9 @@ terraform plan \
 	-var "${PROVIDER_ROLE_TFVAR}=${PROVIDER_ROLE_ARN}" \
 	-out "${ARTIFACTS_DIR}/terraform.plan" \
 	${REFRESH}
-
 PLAN_EXIT_CODE=$?
+echo "##[endgroup]"
+
 case "${PLAN_EXIT_CODE}" in
 
 	"0")
@@ -65,9 +67,15 @@ case "${PLAN_EXIT_CODE}" in
 esac
 set -e
 
+# print only planned changes without noisy drift detection
+# https://github.com/hashicorp/terraform/issues/28803
+terraform show "${ARTIFACTS_DIR}/terraform.plan" | sed --silent '/Terraform will perform the following actions/,$p'
+# output of the command above ends with a colour code without trailing newline, which can mess up following workflow commands
+echo
+
 if [[ -d .artifacts ]]; then
 	cp -r .artifacts "${ARTIFACTS_DIR}"
 fi
 
-PLAN_JSON=$(terraform show -json "${ARTIFACTS_DIR}/terraform.plan" | tee "${ARTIFACTS_DIR}/terraform.plan.json")
-echo "::set-output name=plan_json::${PLAN_JSON}"
+terraform show -json "${ARTIFACTS_DIR}/terraform.plan" > "${ARTIFACTS_DIR}/terraform.plan.json"
+echo "::set-output name=plan_json_path::${ARTIFACTS_DIR}/terraform.plan.json"

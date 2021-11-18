@@ -18,9 +18,13 @@ inputs:
     required: true
 
 outputs:
-  plan_json:
-    description: Planned changes as JSON
-    value: ${{ steps.plan.outputs.plan_json }}
+  plan_json_path:
+    description: Path to planned changes as JSON
+    value: ${{ steps.plan.outputs.plan_json_path }}
+
+  has_changes:
+    description: true/false. Whether there's any planned changes.
+    value: ${{ steps.plan.outputs.has_changes }}
 
 runs:
   using: composite
