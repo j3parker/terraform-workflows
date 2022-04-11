@@ -43,7 +43,7 @@ i.e. If your workspace is `terraform/environments/prod/ca-central-1`, name the e
 
 ### repo-settings
 
-Head over to repo-settings and follow the the [terraform instructions](https://github.com/Brightspace/repo-settings#terraform).
+Head over to repo-settings and follow the the [terraform instructions](https://github.com/Brightspace/repo-settings/blob/main/docs/terraform.md).
 
 ### Update your terraform
 
